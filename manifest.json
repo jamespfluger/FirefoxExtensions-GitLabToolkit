@@ -1,0 +1,27 @@
+{
+  "name": "GitLab Toolkit",
+  "description": "Adds various useful tools on GitLab",
+  "version": "1.0",
+  "homepage_url": "https://github.com/jamespfluger/gitlab-toolkit",
+  "icons": {
+    "48": "icons/gitlab_toolkit_48.png",
+    "96": "icons/gitlab_toolkit_96.png"
+  },
+  "permissions": [ 
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.gitlab.com/*/merge_requests/*"
+      ],
+      "js": [
+        "toolkit.js"
+      ]
+    }
+  ],
+  "browser_action": {
+    "default_title": "Add \"Collapse All\" button"
+  },
+  "manifest_version": 2
+}
