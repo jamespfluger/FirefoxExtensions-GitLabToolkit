@@ -1,12 +1,23 @@
-var timeout = null;
 var didCreateCollapseButton = false;
+var tagToSearchFor = "";
+
+if (location.href.includes("/merge_requests/"))
+    tagToSearchFor = "span";
+else if (location.href.includes("/commit/"))
+    tagToSearchFor = "a";
+
+main();
 
 // If the user has a slow connection, keep trying to find the button until we timeout
-for (let i = 0; i < 60; i++) {
-    setTimeout(tryCreateCollapseButton, 250);
+async function main() {
+    for (let i = 0; i < 60; i++) {
+        tryCreateCollapseButton();
 
-    if (didCreateCollapseButton)
-        break;
+        if (didCreateCollapseButton)
+            break;
+        else
+            await sleep(250);
+    }
 }
 
 function tryCreateCollapseButton() {
@@ -17,9 +28,14 @@ function tryCreateCollapseButton() {
     var expandAllButton = null;
 
     // The expand button is the element that contains a span child w/ the text "Expand all"
-    for (var element of document.getElementsByTagName("span")) {
+    for (var element of document.getElementsByTagName(tagToSearchFor)) {
         if (element.textContent.trim() === "Expand all") {
-            expandAllButton = element.parentElement
+            if (tagToSearchFor === "span")
+                expandAllButton = element.parentElement;
+            else
+                expandAllButton = element;
+
+            break;
         }
     }
 
@@ -39,11 +55,23 @@ function tryCreateCollapseButton() {
 }
 
 function onCollapseAllClick() {
-    let icons = document.getElementsByClassName('diff-toggle-caret gl-mr-2 gl-icon s16')
+    var toggleButtons;
 
-    for (let i = 0; i < icons.length; i++) {
-        if (icons[i].getAttribute('data-testid') === 'chevron-down-icon') {
-            icons[i].dispatchEvent(new Event('click'));
+    if (tagToSearchFor === "span")
+        toggleButtons = document.getElementsByClassName('diff-toggle-caret gl-mr-2 gl-icon s16');
+    else
+        toggleButtons = document.getElementsByClassName('s16 chevron-down');
+
+    for (let i = 0; i < toggleButtons.length; i++) {
+        if (toggleButtons[i].getAttribute('data-testid') === 'chevron-down-icon') {
+            if (tagToSearchFor === "span")
+                toggleButtons[i].dispatchEvent(new Event('click'));
+            else
+                toggleButtons[i].parentElement.parentElement.parentElement.dispatchEvent(new Event('click'));
         }
     }
+}
+
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
